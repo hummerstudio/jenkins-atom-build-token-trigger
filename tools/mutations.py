@@ -13,8 +13,22 @@ import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ATOM = os.path.join(ROOT, "src/main/java/com/jenkinschina/atom/buildtokentrigger/BuildTokenTriggerAtom.java")
-SDK = sorted(glob.glob(os.path.expanduser("~/Codes/jenkins-atom-sdk/target/jenkins-atom-sdk-*.jar")))
-SDK_JAR = SDK[-1]
+def find_sdk():
+    """The SDK is a sibling checkout locally and a checkout inside the job directory on CI."""
+    candidates = [os.environ.get("SDK_JAR", ""),
+                  os.path.join(ROOT, "..", "jenkins-atom-sdk", "target"),
+                  os.path.join(ROOT, "jenkins-atom-sdk", "target"),
+                  os.path.expanduser("~/Codes/jenkins-atom-sdk/target")]
+    for candidate in candidates:
+        if candidate and candidate.endswith(".jar") and os.path.exists(candidate):
+            return candidate
+        found = sorted(glob.glob(os.path.join(candidate, "jenkins-atom-sdk-*.jar"))) if candidate else []
+        if found:
+            return found[-1]
+    raise SystemExit("build the SDK first (../jenkins-atom-sdk/build.sh) or set SDK_JAR")
+
+
+SDK_JAR = find_sdk()
 
 MUTATIONS = [
     ("parameters still go to /build",
@@ -66,9 +80,6 @@ def run_smoke(directory):
 
 
 def main():
-    if not os.path.exists(SDK_JAR):
-        raise SystemExit("build the SDK first: ~/Codes/jenkins-atom-sdk/build.sh")
-
     control = prepare()
     code, output = run_smoke(control)
     if code != 0:
