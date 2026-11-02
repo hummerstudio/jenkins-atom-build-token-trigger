@@ -1,0 +1,11 @@
+{
+  "name": "Trigger Jenkins build by token",
+  "summary": "build-token-trigger 移植：用要触发的 job 的 build token 发一次同步 POST，把 Location 当作队列地址返回，404/302 可放行。",
+  "author": "hummerstudio",
+  "license": "MIT",
+  "tags": [
+    "official-port",
+    "build-token-trigger"
+  ],
+  "homepage": "https://github.com/hummerstudio/jenkins-atom-build-token-trigger"
+}

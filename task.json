@@ -1,0 +1,92 @@
+{
+  "atomCode": "build-token-trigger",
+  "name": "Trigger Jenkins build by token",
+  "version": "1.0.0",
+  "description": "用 build token 触发（同机或远端）Jenkins 的构建：POST /buildByToken/build[WithParameters]，job/token/delay/参数按表单编码发送，读 Location 作队列地址；404/302 可分别用 ignoreMissing/ignoreUnqueued 放行。",
+  "execution": {
+    "packagePath": "build-token-trigger.jar",
+    "language": "java",
+    "target": "$atom_java_path -cp build-token-trigger.jar com.jenkinschina.atom.sdk.AtomRunner"
+  },
+  "input": {
+    "jenkinsUrl": {
+      "label": "Jenkins 地址（如 https://ci.example.com，可带上下文路径 /jenkins）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "job": {
+      "label": "Job 名（多级目录用 / 分隔，如 folder/my-job）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "token": {
+      "label": "Build token（Job 配置 → 构建触发器 → 触发远程构建；留空则用绑定的 token 凭据）",
+      "type": "password",
+      "default": ""
+    },
+    "parameters": {
+      "label": "构建参数，每行 KEY=VALUE（有参数时走 /buildWithParameters）",
+      "type": "textarea",
+      "default": ""
+    },
+    "delay": {
+      "label": "静默期秒数（留空或负数＝不发送 delay）",
+      "type": "vuex-input",
+      "default": ""
+    },
+    "ignoreMissing": {
+      "label": "Job 不存在（HTTP 404）时不算失败，出参 about:missing",
+      "type": "checkbox",
+      "default": "false"
+    },
+    "ignoreUnqueued": {
+      "label": "未被队列接受（HTTP 302）时不算失败，出参 about:unqueued",
+      "type": "checkbox",
+      "default": "false"
+    },
+    "timeoutSeconds": {
+      "label": "连接与读取超时（秒）",
+      "type": "vuex-input",
+      "default": "60"
+    }
+  },
+  "output": {
+    "outcome": {
+      "type": "string",
+      "description": "queued / missing / unqueued"
+    },
+    "queued": {
+      "type": "string",
+      "description": "true 仅当真的进了队列"
+    },
+    "queueUrl": {
+      "type": "string",
+      "description": "队列地址（Location，相对地址用 jenkinsUrl 补全）；放行时是 about:missing / about:unqueued"
+    },
+    "httpCode": {
+      "type": "string",
+      "description": "远端返回的状态码"
+    },
+    "jobUrl": {
+      "type": "string",
+      "description": "该 job 的页面地址（job 名按 /job/ 展开，和插件日志里的一致）"
+    },
+    "triggerUrl": {
+      "type": "string",
+      "description": "实际 POST 的地址"
+    },
+    "location": {
+      "type": "string",
+      "description": "原样的 Location 响应头（可能为空）"
+    }
+  },
+  "x-jenkins": {
+    "protocol": "jenkins-1",
+    "requires": {
+      "runner": ">=0.4.0"
+    },
+    "secrets": {
+      "token": ""
+    }
+  }
+}
